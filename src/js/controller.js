@@ -1,12 +1,17 @@
+import * as model from './model.js';
+import recipeView from "./views/recipeView.js";
+
+//import icons from /omg/icons.svg
+
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+
+
+
+
 const recipeContainer = document.querySelector('.recipe');
 
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
+
 
 // https://forkify-api.herokuapp.com/v2
 
@@ -14,29 +19,35 @@ const timeout = function (s) {
 const APIkey = 'a277813b-063a-4e8d-82c3-0403243901f1';
 const searchUrl = `https://forkify-api.herokuapp.com/api/v2/recipes?search=pizza&key=${APIkey}`;
 
-const recipeUrl = `https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886?key=${APIkey}`;
-
-const showRecipe = async function(){
-  try{
-    const res = await fetch(recipeUrl);
-    const data = await res.json();
-    if(!res.ok) throw new Error(`${data.message} ${res.status}`);
-    let {recipe} = data.data;
-    recipe = {
-      id : recipe.id,
-      title : recipe.title,
-      publisher : recipe.publisher,
-      source_url : recipe.source_url,
-      image_url : recipe.image_url,
-      servings : recipe.servings,
-      cookingTime : recipe.cookingTime,
-      ingredients : recipe.ingredients,
-    }
 
 
-  }catch (e){
+
+
+const controlRecipes = async function() {
+  try {
+    const id = window.location.hash.slice(1);
+    if(!id)return;
+    recipeView.renderSpinner();
+
+    //1.loading recipe
+    await model.loadRecipe(id);
+    const {recipe} = model.state.recipe;
+
+    //2.rendering recipe
+    recipeView.render(model.state.recipe);
+
+  } catch (e) {
     alert(e.message);
   }
 };
-showRecipe();
+
+['hashchange','load'].forEach(event => window.addEventListener(event, controlRecipes));
+
+
+
+
+
+
+
+
 
